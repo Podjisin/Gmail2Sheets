@@ -80,7 +80,7 @@ function formatDateForDisplay(date) {
     hour: 'numeric', minute: 'numeric', hour12: true 
   };
   return date.toLocaleDateString('en-US', options);  // Format date in the desired way, my desired way.
-  TODO: Turn this into a parameter.
+  // TODO: Turn this into a parameter.
 }
 
 function stopScript() {
