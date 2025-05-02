@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <h3>Email Extractor</h3>
+
+    <label>Start Date:</label><br>
+    <input type="date" id="start"><br><br>
+
+    <label>End Date:</label><br>
+    <input type="date" id="end"><br><br>
+
+    <button onclick="runExtractor()">Start</button>
+    <button onclick="stopExtractor()">Stop</button>
+    <br/>
+    <label>Sort By Date:</label><br>
+    <select id="sortOrder">
+      <option value="desc">Descending (Newest First)</option>
+      <option value="asc">Ascending (Oldest First)</option>
+    </select><br><br>
+
+    <script>
+      function runExtractor() {
+        const start = document.getElementById('start').value;
+        const end = document.getElementById('end').value;
+        const sortOrder = document.getElementById('sortOrder').value;  // Get the selected sort order
+
+        if (!start || !end) {
+          alert('Please select both dates.');
+          return;
+        }
+
+        google.script.run.extractEmailsToSheet(start, end, sortOrder);  // Pass sortOrder to this thingamabob
+        alert('Extraction started...');
+      }
+
+      function stopExtractor() {
+        google.script.run.stopScript();
+        alert('Stop requested. It may take a moment to take effect.');
+      }
+    </script>
+  </body>
+</html>
