@@ -20,13 +20,14 @@ function extractEmailsToSheet(startDate, endDate, sortOrder) {
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   sheet.clear();
+  sheet.getRange("A1").setValue("Status:")
+  sheet.getRange("B1").setValue("RUNNING");
   sheet.appendRow(["From", "Date", "Subject"]);
-  sheet.getRange("A1").setValue("RUNNING");
 
   const emailData = [];
 
   for (const thread of threads) {
-    if (sheet.getRange("A1").getValue() === "STOP") {
+    if (sheet.getRange("B1").getValue() === "STOP") {
       Logger.log("Process stopped by user.");
       sheet.appendRow(["--- Script stopped manually ---", "", ""]);
       break;
@@ -34,7 +35,7 @@ function extractEmailsToSheet(startDate, endDate, sortOrder) {
 
     const messages = thread.getMessages();
     for (const message of messages) {
-      if (sheet.getRange("A1").getValue() === "STOP") {
+      if (sheet.getRange("B1").getValue() === "STOP") {
         Logger.log("Process stopped by user.");
         sheet.appendRow(["--- Script stopped manually ---", "", ""]);
         return;
@@ -66,7 +67,7 @@ function extractEmailsToSheet(startDate, endDate, sortOrder) {
     sheet.appendRow(row);
   }
 
-  sheet.getRange("A1").setValue("DONE");
+  sheet.getRange("B1").setValue("DONE");
 }
 
 function extractEmail(fromString) {
@@ -79,13 +80,13 @@ function formatDateForDisplay(date) {
     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', 
     hour: 'numeric', minute: 'numeric', hour12: true 
   };
-  return date.toLocaleDateString('en-US', options);  // Format date in the desired way, my desired way.
-  // TODO: Turn this into a parameter.
+    // TODO: Turn this into a parameter.
+  return date.toLocaleDateString('en-US', options);
 }
 
 function stopScript() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  sheet.getRange("A1").setValue("STOP");
+  sheet.getRange("B1").setValue("STOP");
 }
 
 function formatDateForQuery(date) {

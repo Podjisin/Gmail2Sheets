@@ -12,6 +12,12 @@
     <label>End Date:</label><br>
     <input type="date" id="end"><br><br>
 
+    <label>Date Format</label><br>
+    <input type="text" id="dateTimeFormat" default-value="YYYY-MM-DD HH:mm:ss">
+    <p>Defaults to using: <emp>ddd, YYYY-MM-DD HH:mm A</emp> format </p>
+    <br>
+    <br>
+
     <button onclick="runExtractor()">Start</button>
     <button onclick="stopExtractor()">Stop</button>
     <br/>
@@ -25,14 +31,15 @@
       function runExtractor() {
         const start = document.getElementById('start').value;
         const end = document.getElementById('end').value;
-        const sortOrder = document.getElementById('sortOrder').value;  // Get the selected sort order
+        const sortOrder = document.getElementById('sortOrder').value;
+        const dateTimeFormat = document.getElementById('dateTimeFormat').value;
 
         if (!start || !end) {
           alert('Please select both dates.');
           return;
         }
 
-        google.script.run.extractEmailsToSheet(start, end, sortOrder);  // Pass sortOrder to this thingamabob
+        google.script.run.extractEmailsToSheet(start, end, sortOrder, dateTimeFormat);
         alert('Extraction started...');
       }
 

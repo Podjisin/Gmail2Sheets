@@ -8,6 +8,11 @@ This Google Sheets Script allows you to extract email information from Gmail bas
 * Sort emails by date (ascending or descending).
 * Display extracted data in a Google Sheet.
 * Stop the script manually if needed. (sometimes don't work lol)
+* Accepts date-formatting via days.js
+
+## Not-a-features
+
+* Don't have filters.. so, scam-mails and promotions will also be included to the logs.
 
 ## Prerequisites
 
@@ -30,6 +35,8 @@ This Google Sheets Script allows you to extract email information from Gmail bas
 ### Step 3: Add the Script
 
 1. In the Apps Script editor, replace the default code in the `Code.gs` file with the **Code.gs** content from this repository.
+2. Click on the `File > New > Scripts` and name the file `dayLib`.
+3. Copy and paste `dayLib.gs` content into the created `dayLib.gs` file.
 2. Click on `File > New > HTML` and name the file `Sidebar`.
 3. Copy and paste the **Sidebar.html** content into the newly created `Sidebar.html` file.
 
