@@ -12,7 +12,7 @@ function showSidebar() {
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
-function extractEmailsToSheet(startDate, endDate, sortOrder) {
+function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const query = `after:${formatDateForQuery(start)} before:${formatDateForQuery(end)}`;
@@ -45,7 +45,7 @@ function extractEmailsToSheet(startDate, endDate, sortOrder) {
       const fromEmail = extractEmail(message.getFrom());
 
       // Format the message date
-      const formattedDate = formatDateForDisplay(message.getDate());
+      const formattedDate = formatDateForDisplay(message.getDate(), dateTimeFormat);
 
       emailData.push([
         fromEmail,  // Just the email address
@@ -75,13 +75,23 @@ function extractEmail(fromString) {
   return match ? match[1] : fromString;  // Return the email inside the brackets, or the original string if no match
 }
 
-function formatDateForDisplay(date) {
-  const options = { 
-    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', 
-    hour: 'numeric', minute: 'numeric', hour12: true 
-  };
-    // TODO: Turn this into a parameter.
-  return date.toLocaleDateString('en-US', options);
+// function formatDateForDisplay(date) {
+//   const options = { 
+//     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', 
+//     hour: 'numeric', minute: 'numeric', hour12: true 
+//   };
+//     // TODO: Turn this into a parameter.
+//   return date.toLocaleDateString('en-US', options);
+// }
+
+function formatDateForDisplay(date, format) {
+  if (!format || format === '' || format.length == 0) {
+    format = 'ddd, YYYY-MM-DD HH:mm A'
+  }
+  var now = dayjs(date);
+  Logger.log(now.format(format));
+  return now.format(format)
+
 }
 
 function stopScript() {
