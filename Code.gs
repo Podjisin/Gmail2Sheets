@@ -16,13 +16,35 @@ function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const query = `after:${formatDateForQuery(start)} before:${formatDateForQuery(end)}`;
+  // Uncomment this query if you want to filter promotions, social, and forums.
+  // const query = `after:${formatDateForQuery(start)} before:${formatDateForQuery(end)} -category:promotions -category:social -category:forums is:important`;
   const threads = GmailApp.search(query);
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   sheet.clear();
-  sheet.getRange("A1").setValue("Status:")
-  sheet.getRange("B1").setValue("RUNNING");
+
+  // Style and set status label
+  const labelCell = sheet.getRange("A1");
+  labelCell.setValue("Status:")
+    .setFontWeight("bold")
+    .setBackground("#e0e0e0")  // light gray
+    .setFontColor("black");
+
+  // Style and set status RUNNING
+  const statusCell = sheet.getRange("B1");
+  statusCell.setValue("RUNNING")
+    .setFontWeight("bold")
+    .setFontColor("white")
+    .setBackground("#4285F4");  // Google blue
+
   sheet.appendRow(["From", "Date", "Subject"]);
+
+  const lastRow = sheet.getLastRow();
+  const headerRange = sheet.getRange(lastRow, 1, 1, 3);
+  headerRange
+    .setFontWeight("bold")
+    .setHorizontalAlignment("center")
+    .setBackground("#f1f3f4");
 
   const emailData = [];
 
@@ -30,7 +52,7 @@ function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
     if (sheet.getRange("B1").getValue() === "STOP") {
       Logger.log("Process stopped by user.");
       sheet.appendRow(["--- Script stopped manually ---", "", ""]);
-      break;
+      return;
     }
 
     const messages = thread.getMessages();
@@ -41,48 +63,41 @@ function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
         return;
       }
 
-      // Extract only the email address from "From"
       const fromEmail = extractEmail(message.getFrom());
-
-      // Format the message date
       const formattedDate = formatDateForDisplay(message.getDate(), dateTimeFormat);
 
-      emailData.push([
-        fromEmail,  // Just the email address
-        formattedDate,
-        message.getSubject()
-      ]);
+      // Attempt to skip promotional-looking or scammy messages
+      // Uncomment and tweak as you want.
+      if (/noreply|no-reply|offers|marketing|promo/i.test(fromEmail)) continue;
+      if (/free money|claim now|urgent action required/i.test(subject)) continue;
+
+      emailData.push([fromEmail, formattedDate, message.getSubject()]);
     }
   }
 
-  // Sort emails by date (column index 1 is Date)
   emailData.sort((a, b) => {
     const dateA = new Date(a[1]);
     const dateB = new Date(b[1]);
     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
-  // Write sorted data to sheet
   for (const row of emailData) {
     sheet.appendRow(row);
   }
 
-  sheet.getRange("B1").setValue("DONE");
+  // Style and set status DONE
+  sheet.getRange("B1")
+    .setValue("DONE")
+    .setFontWeight("bold")
+    .setFontColor("white")
+    .setBackground("#34A853");  // Google green
 }
+
 
 function extractEmail(fromString) {
   const match = fromString.match(/<([^>]+)>/);  // Match content inside angle brackets
   return match ? match[1] : fromString;  // Return the email inside the brackets, or the original string if no match
 }
-
-// function formatDateForDisplay(date) {
-//   const options = { 
-//     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', 
-//     hour: 'numeric', minute: 'numeric', hour12: true 
-//   };
-//     // TODO: Turn this into a parameter.
-//   return date.toLocaleDateString('en-US', options);
-// }
 
 function formatDateForDisplay(date, format) {
   if (!format || format === '' || format.length == 0) {
@@ -96,7 +111,11 @@ function formatDateForDisplay(date, format) {
 
 function stopScript() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  sheet.getRange("B1").setValue("STOP");
+  sheet.getRange("B1")
+    .setValue("STOP")
+    .setFontWeight("bold")
+    .setFontColor("white")
+    .setBackground("#EA4335");  // Google red
 }
 
 function formatDateForQuery(date) {
