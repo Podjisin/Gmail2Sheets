@@ -64,12 +64,13 @@ function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
       }
 
       const fromEmail = extractEmail(message.getFrom());
+      const subject = message.getSubject();
       const formattedDate = formatDateForDisplay(message.getDate(), dateTimeFormat);
 
       // Attempt to skip promotional-looking or scammy messages
       // Uncomment and tweak as you want.
-      if (/noreply|no-reply|offers|marketing|promo/i.test(fromEmail)) continue;
-      if (/free money|claim now|urgent action required/i.test(subject)) continue;
+      // if (/noreply|no-reply|offers|marketing|promo/i.test(fromEmail)) continue;
+      // if (/free money|claim now|urgent action required/i.test(subject)) continue;
 
       emailData.push([fromEmail, formattedDate, message.getSubject()]);
     }
