@@ -2,31 +2,96 @@
 <html>
   <head>
     <base target="_top">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 15px;
+        background-color: #f9f9f9;
+      }
+
+      h3 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: bold;
+        color: #444;
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      input[type="date"],
+      input[type="text"],
+      select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      button {
+        width: 48%;
+        padding: 10px;
+        margin: 5px 1%;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      p {
+        font-size: 0.9em;
+        color: #555;
+        margin-top: 20px;
+      }
+
+      a {
+        color: #1a73e8;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
     <h3>Email Extractor</h3>
 
-    <label>Start Date:</label><br>
-    <input type="date" id="start"><br><br>
+    <label>Start Date:</label>
+    <input type="date" id="start">
 
-    <label>End Date:</label><br>
-    <input type="date" id="end"><br><br>
+    <label>End Date:</label>
+    <input type="date" id="end">
 
-    <label>Date Format:</label><br>
+    <label>Date Format:</label>
     <input type="text" id="dateTimeFormat" placeholder="ddd, YYYY-MM-DD HH:mm A">
-    <br><br>
-    <label>Sort By Date:</label><br>
+
+    <label>Sort By Date:</label>
     <select id="sortOrder">
       <option value="desc">Descending (Newest First)</option>
       <option value="asc">Ascending (Oldest First)</option>
-    </select><br><br>
+    </select>
 
-    <button onclick="runExtractor()">Start</button>
-    <button onclick="stopExtractor()">Stop</button>
+    <div style="text-align: center;">
+      <button onclick="runExtractor()">Start</button>
+      <!-- <button onclick="stopExtractor()">Stop</button> -->
+    </div>
 
     <p>
-      Refer to this documentation for date and time formatting,
-       <a href="https://day.js.org/docs/en/display/format" target="_blank" rel="noopener noreferrer">DaysJS.</a> 
+      Refer to this documentation for date and time formatting:
+      <a href="https://day.js.org/docs/en/display/format" target="_blank" rel="noopener noreferrer">Day.js Docs</a>
     </p>
 
     <script>
