@@ -71,48 +71,77 @@
 
     <label>Start Date:</label>
     <input type="date" id="start">
-
+    
     <label>End Date:</label>
     <input type="date" id="end">
-
+    
     <label>Date Format:</label>
     <input type="text" id="dateTimeFormat" placeholder="ddd, YYYY-MM-DD HH:mm A">
-
+    
     <label>Sort By Date:</label>
     <select id="sortOrder">
       <option value="desc">Descending (Newest First)</option>
       <option value="asc">Ascending (Oldest First)</option>
     </select>
 
+    
+    <label>Search Scope:</label>
+    <select id="scope">
+      <option value="inbox">Inbox Only</option>
+      <option value="anywhere">All Mail (including archived)</option>
+      <option value="custom">Custom Label</option>
+    </select>
+    
+    <label id="labelFilterLabel" style="display:none;">Label (if custom selected):</label>
+    <input type="text" id="labelFilter" placeholder="e.g. Work/Clients" style="display:none;">
+    
+    <label>Email Whitelist (comma-separated):</label>
+    <input type="text" id="whitelist" placeholder="e.g. boss@example.com, hr@company.com">
+    
+    <label>Email Blacklist (comma-separated):</label>
+    <input type="text" id="blacklist" placeholder="e.g. promo@shop.com, no-reply@news.com">
+    
     <div style="text-align: center;">
       <button onclick="runExtractor()">Start</button>
-      <!-- <button onclick="stopExtractor()">Stop</button> -->
     </div>
-
+    
     <p>
       Refer to this documentation for date and time formatting:
       <a href="https://day.js.org/docs/en/display/format" target="_blank" rel="noopener noreferrer">Day.js Docs</a>
     </p>
-
+    
     <script>
+      const scopeSelect = document.getElementById("scope");
+      const labelInput = document.getElementById("labelFilter");
+      const labelFilterLabel = document.getElementById("labelFilterLabel");
+    
+      scopeSelect.addEventListener("change", function () {
+        if (this.value === "custom") {
+          labelInput.style.display = "block";
+          labelFilterLabel.style.display = "block";
+        } else {
+          labelInput.style.display = "none";
+          labelFilterLabel.style.display = "none";
+        }
+      });
+    
       function runExtractor() {
         const start = document.getElementById('start').value;
         const end = document.getElementById('end').value;
         const sortOrder = document.getElementById('sortOrder').value;
         const dateTimeFormat = document.getElementById('dateTimeFormat').value;
-
+        const scope = document.getElementById('scope').value;
+        const label = document.getElementById('labelFilter').value;
+        const whitelist = document.getElementById('whitelist').value;
+        const blacklist = document.getElementById('blacklist').value;
+    
         if (!start || !end) {
           alert('Please select both dates.');
           return;
         }
-
-        google.script.run.extractEmailsToSheet(start, end, sortOrder, dateTimeFormat);
+    
+        google.script.run.extractEmailsToSheet(start, end, sortOrder, dateTimeFormat, scope, label, whitelist, blacklist);
         alert('Extraction started...');
-      }
-
-      function stopExtractor() {
-        google.script.run.stopScript();
-        alert('Stop requested. It may take a moment to take effect.');
       }
     </script>
   </body>

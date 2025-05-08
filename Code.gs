@@ -12,35 +12,43 @@ function showSidebar() {
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
-function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
+function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat, scope, label, whitelist, blacklist) {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const query = `after:${formatDateForQuery(start)} before:${formatDateForQuery(end)}`;
-  // Uncomment this query if you want to filter promotions, social, and forums.
-  // const query = `after:${formatDateForQuery(start)} before:${formatDateForQuery(end)} -category:promotions -category:social -category:forums is:important`;
-  const threads = GmailApp.search(query);
+
+  let baseQuery = `after:${formatDateForQuery(start)} before:${formatDateForQuery(end)}`;
+  
+  if (scope === "inbox") {
+    baseQuery += " in:inbox";
+  } else if (scope === "anywhere") {
+    baseQuery += " in:anywhere -in:spam -in:trash";
+  } else if (scope === "custom" && label) {
+    baseQuery += ` label:${label}`;
+  }
+
+  const whitelistArray = whitelist ? whitelist.split(',').map(e => e.trim().toLowerCase()) : [];
+  const blacklistArray = blacklist ? blacklist.split(',').map(e => e.trim().toLowerCase()) : [];
+
+  const threads = GmailApp.search(baseQuery);
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   sheet.clear();
 
-  // Style and set status label
+  // Status bar setup
   const labelCell = sheet.getRange("A1");
   labelCell.setValue("Status:")
     .setFontWeight("bold")
-    .setBackground("#e0e0e0")  // light gray
+    .setBackground("#e0e0e0")
     .setFontColor("black");
 
-  // Style and set status RUNNING
   const statusCell = sheet.getRange("B1");
   statusCell.setValue("RUNNING")
     .setFontWeight("bold")
     .setFontColor("white")
-    .setBackground("#4285F4");  // Google blue
+    .setBackground("#4285F4");
 
   sheet.appendRow(["From", "Date", "Subject"]);
-
-  const lastRow = sheet.getLastRow();
-  const headerRange = sheet.getRange(lastRow, 1, 1, 3);
+  const headerRange = sheet.getRange(sheet.getLastRow(), 1, 1, 3);
   headerRange
     .setFontWeight("bold")
     .setHorizontalAlignment("center")
@@ -49,32 +57,33 @@ function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
   const emailData = [];
 
   for (const thread of threads) {
+  if (sheet.getRange("B1").getValue() === "STOP") {
+    Logger.log("Process stopped by user.");
+    sheet.appendRow(["--- Script stopped manually ---", "", ""]);
+    return;
+  }
+
+  const messages = thread.getMessages().filter(msg => {
+    const msgDate = msg.getDate();
+    return msgDate >= start && msgDate <= end;
+  });
+
+  for (const message of messages) {
     if (sheet.getRange("B1").getValue() === "STOP") {
       Logger.log("Process stopped by user.");
       sheet.appendRow(["--- Script stopped manually ---", "", ""]);
       return;
     }
 
-    const messages = thread.getMessages();
-    for (const message of messages) {
-      if (sheet.getRange("B1").getValue() === "STOP") {
-        Logger.log("Process stopped by user.");
-        sheet.appendRow(["--- Script stopped manually ---", "", ""]);
-        return;
-      }
+    const fromEmail = extractEmail(message.getFrom()).toLowerCase();
+    const subject = message.getSubject();
+    const formattedDate = formatDateForDisplay(message.getDate(), dateTimeFormat);
 
-      const fromEmail = extractEmail(message.getFrom());
-      const subject = message.getSubject();
-      const formattedDate = formatDateForDisplay(message.getDate(), dateTimeFormat);
+    if (whitelistArray.length > 0 && !whitelistArray.includes(fromEmail)) continue;
+    if (blacklistArray.includes(fromEmail)) continue;
 
-      // Attempt to skip promotional-looking or scammy messages
-      // Uncomment and tweak as you want.
-      // if (/noreply|no-reply|offers|marketing|promo/i.test(fromEmail)) continue;
-      // if (/free money|claim now|urgent action required/i.test(subject)) continue;
-
-      emailData.push([fromEmail, formattedDate, message.getSubject()]);
-    }
-  }
+    emailData.push([fromEmail, formattedDate, subject]);
+  }}
 
   emailData.sort((a, b) => {
     const dateA = new Date(a[1]);
@@ -86,18 +95,17 @@ function extractEmailsToSheet(startDate, endDate, sortOrder, dateTimeFormat) {
     sheet.appendRow(row);
   }
 
-  // Style and set status DONE
+  // Mark status as DONE
   sheet.getRange("B1")
     .setValue("DONE")
     .setFontWeight("bold")
     .setFontColor("white")
-    .setBackground("#34A853");  // Google green
+    .setBackground("#34A853");
 }
-
 
 function extractEmail(fromString) {
   const match = fromString.match(/<([^>]+)>/);  // Match content inside angle brackets
-  return match ? match[1] : fromString;  // Return the email inside the brackets, or the original string if no match
+  return match ? match[1] : fromString; 
 }
 
 function formatDateForDisplay(date, format) {
